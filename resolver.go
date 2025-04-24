@@ -2,6 +2,6 @@
 package did
 
 type Resolver interface {
-	ResolveHandle(identity string) (string, error)
-	ResolveDID(did string) (*Document, error)
+	ResolveHandle(identity string) (*DID, error)
+	ResolveDID(did *DID) (*Document, error)
 }
