@@ -12,16 +12,33 @@ import (
 	netutil "github.com/lunar-parklife/did/internal/net"
 )
 
-type Resolver struct {
-	PLCHost *url.URL
+var defaultHost *url.URL
+
+func init() {
+	url, err := url.Parse("https://plc.directory")
+	if err != nil {
+		panic("wtf")
+	}
+	defaultHost = url
 }
 
-func (resolver *Resolver) ResolveHandle(handle string) (*did.DID, error) {
+type resolver struct {
+	cache   netutil.Cache
+	plcHost *url.URL
+}
+
+func DefaultResolver() did.Resolver {
+	return &resolver{
+		plcHost: defaultHost,
+	}
+}
+
+func (resolver *resolver) ResolveHandle(handle string) (*did.DID, error) {
 	return netutil.ResolveIdentity(handle)
 }
 
-func (resolver *Resolver) ResolveDID(targetDid *did.DID) (*did.Document, error) {
-	target := fmt.Sprintf("%s/%s", resolver.PLCHost.String(), targetDid.String())
+func (resolver *resolver) ResolveDID(targetDid *did.DID) (*did.Document, error) {
+	target := fmt.Sprintf("%s/%s", resolver.plcHost.String(), targetDid.String())
 	response, err := http.Get(target)
 	if err != nil {
 		return nil, err
